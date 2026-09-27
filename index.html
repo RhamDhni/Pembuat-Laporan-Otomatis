@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Pembuat Laporan Otomatis PDF</title>
+    <!-- Memuat Tailwind CSS untuk tampilan yang rapi -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Memuat jsPDF untuk fungsi ekspor PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen py-10 px-4">
+
+    <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-md">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Form Pembuat Laporan Otomatis</h2>
+        
+        <!-- Form Input Laporan -->
+        <form id="reportForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Nama Pelapor</label>
+                <input type="text" id="nama" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Judul / Perihal Laporan</label>
+                <input type="text" id="judul" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Tanggal Laporan</label>
+                <input type="date" id="tanggal" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Isi / Detail Laporan</label>
+                <textarea id="isi" rows="4" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition font-medium">
+                Download Laporan PDF
+            </button>
+        </form>
+    </div>
+
+    <!-- Script JavaScript untuk Proses Otomatisasi PDF -->
+    <script>
+        document.getElementById('reportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Mengambil nilai dari form
+            const nama = document.getElementById('nama').value;
+            const judul = document.getElementById('judul').value;
+            const tanggal = document.getElementById('tanggal').value;
+            const isi = document.getElementById('isi').value;
+
+            // Inisialisasi jsPDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Desain Tampilan dalam PDF
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(18);
+            doc.text("LAPORAN RESMI", 105, 20, { align: "center" });
+
+            doc.setLineWidth(0.5);
+            doc.line(20, 25, 190, 25); // Garis pembatas
+
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "normal");
+            
+            // Informasi Meta Laporan
+            doc.text(`Nama Pelapor : ${nama}`, 20, 35);
+            doc.text(`Judul        : ${judul}`, 20, 43);
+            doc.text(`Tanggal      : ${tanggal}`, 20, 51);
+
+            doc.line(20, 58, 190, 58);
+
+            // Paragraf Isi Laporan (otomatis memotong teks jika terlalu panjang)
+            doc.setFont("helvetica", "bold");
+            doc.text("Isi Laporan:", 20, 68);
+            
+            doc.setFont("helvetica", "normal");
+            const splitIsi = doc.splitTextToSize(isi, 170);
+            doc.text(splitIsi, 20, 76);
+
+            // Tanda Tangan di bagian bawah
+            let finalY = 76 + (splitIsi.length * 7) + 20;
+            doc.text("Hormat Kami,", 140, finalY);
+            doc.text("( " + nama + " )", 140, finalY + 25);
+
+            // Menyimpan file PDF dengan nama otomatis
+            doc.save(`Laporan_${judul.replace(/\s+/g, '_')}.pdf`);
+        });
+    </script>
+
+</body>
+</html>
